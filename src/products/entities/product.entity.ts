@@ -19,7 +19,9 @@ export class Product {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToMany(() => Category)
+  @ManyToMany(() => Category, (category) => category.products, {
+    cascade: true,
+  })
   @JoinTable({ name: 'products_categories' })
   categories: Category[];
 }

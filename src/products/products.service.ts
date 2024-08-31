@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoriesService } from 'src/categories/categories.service';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
@@ -17,12 +17,12 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto) {
     const { categories_ids } = createProductDto;
 
-    const existingCategories =
+    const foundCategories =
       await this.categoryService.validateCategoriesIds(categories_ids);
 
     const product = this.productsRepository.create({
       ...createProductDto,
-      categories: existingCategories,
+      categories: foundCategories,
     });
 
     return this.productsRepository.save(product);
@@ -42,17 +42,40 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID ${id} was not found`);
     }
 
-    return this.productsRepository.findOne({
-      where: { id },
-      relations: { categories: true },
-    });
+    return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    const foundProduct = await this.findOne(id);
+
+    if (!foundProduct) {
+      throw new NotFoundException(`Product with ID ${id} was not found`);
+    }
+
+    const { categories_ids } = updateProductDto;
+
+    if (categories_ids) {
+      const foundCategories =
+        await this.categoryService.validateCategoriesIds(categories_ids);
+
+      await this.productsRepository.save({
+        ...foundProduct,
+        name: updateProductDto.name,
+        categories: foundCategories,
+      });
+      return this.findOne(id);
+    }
+
+    await this.productsRepository.save({
+      ...foundProduct,
+      name: updateProductDto.name,
+    });
+
+    return this.findOne(id);
   }
 
   remove(id: number) {
+    console.log('a');
     return `This action removes a #${id} product`;
   }
 }

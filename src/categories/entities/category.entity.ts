@@ -21,4 +21,7 @@ export class Category {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @ManyToMany(() => Product, (product) => product.categories)
+  products: Product[];
 }
