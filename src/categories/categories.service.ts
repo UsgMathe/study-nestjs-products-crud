@@ -24,11 +24,11 @@ export class CategoriesService {
       name: normalizedCategoryName,
     });
 
-    const existingCategory = await this.categoriesRepository.findOneBy({
+    const foundCategory = await this.categoriesRepository.findOneBy({
       name: normalizedCategoryName,
     });
 
-    if (existingCategory) {
+    if (foundCategory) {
       throw new ConflictException(
         `Category with name '${createCategoryDto.name}' already exists`,
       );
@@ -48,19 +48,19 @@ export class CategoriesService {
   }
 
   async findOne(id: number) {
-    const existingCategory = await this.categoriesRepository.findOneBy({ id });
+    const foundCategory = await this.categoriesRepository.findOneBy({ id });
 
-    if (!existingCategory) {
+    if (!foundCategory) {
       throw new NotFoundException(`Category with ID ${id} was not found`);
     }
 
-    return existingCategory;
+    return foundCategory;
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    const existingCategory = await this.findOne(id);
+    const foundCategory = await this.findOne(id);
 
-    if (!existingCategory) {
+    if (!foundCategory) {
       throw new NotFoundException(`Category with ID ${id} was not found`);
     }
 
@@ -71,9 +71,9 @@ export class CategoriesService {
   }
 
   async remove(id: number) {
-    const existingCategory = await this.findOne(id);
+    const foundCategory = await this.findOne(id);
 
-    if (!existingCategory) {
+    if (!foundCategory) {
       throw new NotFoundException(`Category with ID ${id} was not found`);
     }
 
@@ -82,15 +82,15 @@ export class CategoriesService {
   }
 
   async validateCategoriesIds(ids: number[]) {
-    const existingCategories = await this.findAllByIds(ids);
+    const foundCategories = await this.findAllByIds(ids);
 
-    const existingCategoriesIds = existingCategories.map(
-      (existingCategory) => existingCategory.id,
+    const foundCategoriesIds = foundCategories.map(
+      (foundCategory) => foundCategory.id,
     );
 
-    if (existingCategories.length != ids.length) {
+    if (foundCategories.length != ids.length) {
       const notFoundCategoriesIds = ids.filter(
-        (categoryId) => !existingCategoriesIds.includes(categoryId),
+        (categoryId) => !foundCategoriesIds.includes(categoryId),
       );
 
       if (notFoundCategoriesIds.length > 1) {
@@ -104,6 +104,6 @@ export class CategoriesService {
       );
     }
 
-    return existingCategories;
+    return foundCategories;
   }
 }
