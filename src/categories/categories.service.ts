@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
@@ -41,6 +41,12 @@ export class CategoriesService {
     return this.categoriesRepository.find();
   }
 
+  async findAllByIds(ids: number[]) {
+    return await this.categoriesRepository.find({
+      where: { id: In(ids) },
+    });
+  }
+
   async findOne(id: number) {
     const existingCategory = await this.categoriesRepository.findOneBy({ id });
 
@@ -73,5 +79,29 @@ export class CategoriesService {
 
     await this.categoriesRepository.delete({ id });
     return;
+  }
+
+  async validateCategoriesIds(ids: number[]) {
+    const existingCategories = await this.findAllByIds(ids);
+
+    const existingCategoriesIds = existingCategories.map(
+      (existingCategory) => existingCategory.id,
+    );
+
+    if (existingCategories.length != ids.length) {
+      const notFoundCategoriesIds = ids.filter(
+        (categoryId) => !existingCategoriesIds.includes(categoryId),
+      );
+
+      if (notFoundCategoriesIds.length > 1) {
+        throw new NotFoundException(
+          `Categories with IDs ${notFoundCategoriesIds.join(', ')} not found`,
+        );
+      }
+
+      throw new NotFoundException(
+        `Category with ID ${notFoundCategoriesIds[0]} not found`,
+      );
+    }
   }
 }
