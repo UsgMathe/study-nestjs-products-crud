@@ -48,10 +48,6 @@ export class ProductsService {
   async update(id: number, updateProductDto: UpdateProductDto) {
     const foundProduct = await this.findOne(id);
 
-    if (!foundProduct) {
-      throw new NotFoundException(`Product with ID ${id} was not found`);
-    }
-
     const { categories_ids } = updateProductDto;
 
     if (categories_ids) {
@@ -74,8 +70,10 @@ export class ProductsService {
     return this.findOne(id);
   }
 
-  remove(id: number) {
-    console.log('a');
-    return `This action removes a #${id} product`;
+  async remove(id: number) {
+    await this.findOne(id);
+
+    await this.productsRepository.delete({ id });
+    return;
   }
 }
