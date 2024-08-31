@@ -103,5 +103,7 @@ export class CategoriesService {
         `Category with ID ${notFoundCategoriesIds[0]} not found`,
       );
     }
+
+    return existingCategories;
   }
 }

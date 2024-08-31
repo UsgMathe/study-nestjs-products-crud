@@ -15,16 +15,21 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-    const product = this.productsRepository.create(createProductDto);
     const { categories_ids } = createProductDto;
 
-    await this.categoryService.validateCategoriesIds(categories_ids);
+    const existingCategories =
+      await this.categoryService.validateCategoriesIds(categories_ids);
+
+    const product = this.productsRepository.create({
+      ...createProductDto,
+      categories: existingCategories,
+    });
 
     return this.productsRepository.save(product);
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll() {
+    return this.productsRepository.find({ relations: { categories: true } });
   }
 
   findOne(id: number) {
