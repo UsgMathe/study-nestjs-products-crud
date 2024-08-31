@@ -58,11 +58,7 @@ export class CategoriesService {
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    const foundCategory = await this.findOne(id);
-
-    if (!foundCategory) {
-      throw new NotFoundException(`Category with ID ${id} was not found`);
-    }
+    await this.findOne(id);
 
     const category = this.categoriesRepository.create(updateCategoryDto);
     await this.categoriesRepository.update({ id }, category);
@@ -71,11 +67,7 @@ export class CategoriesService {
   }
 
   async remove(id: number) {
-    const foundCategory = await this.findOne(id);
-
-    if (!foundCategory) {
-      throw new NotFoundException(`Category with ID ${id} was not found`);
-    }
+    await this.findOne(id);
 
     await this.categoriesRepository.delete({ id });
     return;
