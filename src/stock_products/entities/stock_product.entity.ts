@@ -5,7 +5,9 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -14,7 +16,8 @@ export class StockProduct {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Product)
+  @OneToOne(() => Product)
+  @JoinColumn()
   product: Product;
 
   @Column('int')
