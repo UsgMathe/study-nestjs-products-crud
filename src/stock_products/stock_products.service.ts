@@ -44,8 +44,29 @@ export class StockProductsService {
     return foundStockProduct;
   }
 
-  update(id: number, updateStockProductDto: UpdateStockProductDto) {
-    return `This action updates a #${id} stockProduct`;
+  async update(id: number, updateStockProductDto: UpdateStockProductDto) {
+    await this.findOne(id);
+
+    const { product_id, quantity, price } = updateStockProductDto;
+
+    if (product_id) {
+      const foundProduct = await this.productsService.findOne(product_id);
+
+      await this.stockProductsRepository.update(
+        { id },
+        { product: foundProduct, quantity, price },
+      );
+    } else {
+      await this.stockProductsRepository.update(
+        { id },
+        {
+          quantity,
+          price,
+        },
+      );
+    }
+
+    return this.findOne(id);
   }
 
   remove(id: number) {
