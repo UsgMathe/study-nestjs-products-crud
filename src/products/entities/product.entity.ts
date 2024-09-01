@@ -1,10 +1,12 @@
 import { Category } from 'src/categories/entities/category.entity';
+import { StockProduct } from 'src/stock_products/entities/stock_product.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -24,4 +26,7 @@ export class Product {
   })
   @JoinTable({ name: 'products_categories' })
   categories: Category[];
+
+  @OneToMany(() => StockProduct, (stockProduct) => stockProduct.product)
+  stock_product: StockProduct[];
 }

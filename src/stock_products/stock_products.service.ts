@@ -14,12 +14,21 @@ export class StockProductsService {
     private readonly productsService: ProductsService,
   ) {}
 
-  create(createStockProductDto: CreateStockProductDto) {
-    return 'This action adds a new stockProduct';
+  async create(createStockProductDto: CreateStockProductDto) {
+    const product = await this.productsService.findOne(
+      createStockProductDto.product_id,
+    );
+
+    const stockProduct = this.stockProductsRepository.create({
+      ...createStockProductDto,
+      product,
+    });
+
+    return await this.stockProductsRepository.save(stockProduct);
   }
 
   findAll() {
-    return `This action returns all stockProducts`;
+    return this.stockProductsRepository.find({ relations: { product: true } });
   }
 
   findOne(id: number) {
