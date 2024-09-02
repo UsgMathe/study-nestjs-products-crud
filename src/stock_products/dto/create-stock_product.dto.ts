@@ -1,4 +1,4 @@
-import { IsNumber, IsPositive, MaxLength, MinLength } from 'class-validator';
+import { IsNumber, IsPositive } from 'class-validator';
 
 export class CreateStockProductDto {
   @IsNumber()
