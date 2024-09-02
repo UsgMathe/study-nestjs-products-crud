@@ -49,6 +49,10 @@ export class StockProductsService {
 
     const { product_id, quantity, price } = updateStockProductDto;
 
+    if (!product_id && !quantity && !price) {
+      return this.findOne(id);
+    }
+
     if (product_id) {
       const foundProduct = await this.productsService.findOne(product_id);
 
