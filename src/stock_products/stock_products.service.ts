@@ -69,7 +69,10 @@ export class StockProductsService {
     return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} stockProduct`;
+  async remove(id: number) {
+    await this.findOne(id);
+
+    await this.stockProductsRepository.delete({ id });
+    return;
   }
 }
