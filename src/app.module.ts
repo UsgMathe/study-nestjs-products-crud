@@ -13,7 +13,7 @@ import { StockProduct } from './stock_products/entities/stock_product.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: ':memory:',
+      database: './database/db.sql',
       synchronize: true,
       entities: [Product, Category, StockProduct],
     }),
