@@ -9,7 +9,6 @@ import {
   Post,
 } from '@nestjs/common';
 import {
-  ApiAcceptedResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
@@ -92,7 +91,7 @@ export class CategoriesController {
     description: 'ID of an existing product',
     example: 1,
   })
-  @ApiBody({ type: CreateCategoryDto })
+  @ApiBody({ type: UpdateCategoryDto })
   @ApiOkResponse({
     type: Category,
     description: 'Updated category.',
