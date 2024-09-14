@@ -8,6 +8,7 @@ export class CreateCategoryDto {
     minLength: 3,
     maxLength: 50,
     description: 'The name of a category',
+    example: 'electronics',
   })
   name: string;
 
@@ -18,6 +19,7 @@ export class CreateCategoryDto {
     minLength: 3,
     maxLength: 250,
     description: 'The description of a category',
+    example: 'All electronic products',
   })
   description?: string;
 }
