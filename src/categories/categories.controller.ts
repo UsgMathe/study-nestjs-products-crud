@@ -33,7 +33,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Add a new category' })
+  @ApiOperation({ summary: 'Create a new category' })
   @ApiCreatedResponse({
     type: Category,
     description: 'Category successfully created.',
@@ -62,9 +62,14 @@ export class CategoriesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Find category by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of category to return',
+    example: 1,
+  })
   @ApiOkResponse({
     type: Category,
-    description: 'Finded category.',
+    description: 'Found category.',
   })
   @ApiNotFoundResponse({
     description: 'Category not found',
@@ -76,12 +81,17 @@ export class CategoriesController {
       },
     },
   })
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(+id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an existing category' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of an existing product',
+    example: 1,
+  })
   @ApiBody({ type: CreateCategoryDto })
   @ApiOkResponse({
     type: Category,
@@ -98,7 +108,7 @@ export class CategoriesController {
     },
   })
   update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoriesService.update(+id, updateCategoryDto);
@@ -106,7 +116,12 @@ export class CategoriesController {
 
   @Delete(':id')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Deletes a category' })
+  @ApiOperation({ summary: 'Deletes a existing category' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of an existing product',
+    example: 1,
+  })
   @ApiNoContentResponse({ description: 'Category successfully deleted.' })
   @ApiNotFoundResponse({
     description: 'Category not found',
@@ -118,7 +133,7 @@ export class CategoriesController {
       },
     },
   })
-  remove(@Param('id') id: number) {
+  remove(@Param('id') id: string) {
     return this.categoriesService.remove(+id);
   }
 }
