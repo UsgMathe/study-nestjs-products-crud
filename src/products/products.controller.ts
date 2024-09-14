@@ -48,7 +48,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', description: 'ID of product to return' })
+  @ApiParam({ name: 'id', description: 'ID of product to return', example: 1 })
   @ApiOperation({ summary: 'Find product by ID' })
   @ApiOkResponse({ description: 'Found product', type: Product })
   @ApiNotFoundResponse({
@@ -67,7 +67,11 @@ export class ProductsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an existing product' })
-  @ApiParam({ name: 'id', description: 'ID of an existing product' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of an existing product',
+    example: 1,
+  })
   @ApiBody({ type: UpdateProductDto })
   @ApiOkResponse({ description: 'Updated category', type: Product })
   @ApiNotFoundResponse({
@@ -87,7 +91,11 @@ export class ProductsController {
   @Delete(':id')
   @HttpCode(204)
   @ApiOperation({ summary: 'Deletes a existing product' })
-  @ApiParam({ name: 'id', description: 'ID of an existing product' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of an existing product',
+    example: 1,
+  })
   @ApiNoContentResponse({ description: 'Product successfully deleted' })
   @ApiNotFoundResponse({
     description: 'Product not found',
