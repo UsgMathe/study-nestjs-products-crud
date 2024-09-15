@@ -56,7 +56,7 @@ export class ProductsService {
 
       await this.productsRepository.save({
         ...foundProduct,
-        name: updateProductDto.name,
+        ...updateProductDto,
         categories: foundCategories,
       });
       return this.findOne(id);
@@ -64,7 +64,7 @@ export class ProductsService {
 
     await this.productsRepository.save({
       ...foundProduct,
-      name: updateProductDto.name,
+      ...updateProductDto,
     });
 
     return this.findOne(id);

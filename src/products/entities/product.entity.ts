@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Category } from 'src/categories/entities/category.entity';
 import { StockProduct } from 'src/stock_products/entities/stock_product.entity';
 import {
@@ -17,9 +17,16 @@ export class Product {
   @ApiProperty({ example: 1 })
   id: number;
 
-  @ApiProperty({ example: 'Microwave' })
   @Column()
+  @ApiProperty({ example: 'Microwave' })
   name: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({
+    example:
+      'Small oven that uses electromagnetic waves to heat or cook food quickly',
+  })
+  description: string | null;
 
   @CreateDateColumn()
   @ApiProperty({ example: '2024-09-13T00:53:09.000Z' })

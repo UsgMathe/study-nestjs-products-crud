@@ -1,5 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNumber, IsString, Length } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -11,6 +17,18 @@ export class CreateProductDto {
     example: 'Microwave',
   })
   name: string;
+
+  @IsString()
+  @Length(3, 250)
+  @IsOptional()
+  @ApiPropertyOptional({
+    minLength: 3,
+    maxLength: 250,
+    description: 'The description of a product',
+    example:
+      'Small oven that uses electromagnetic waves to heat or cook food quickly',
+  })
+  description?: string;
 
   @IsArray()
   @IsNumber({}, { each: true })
