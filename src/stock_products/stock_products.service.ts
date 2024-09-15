@@ -28,13 +28,23 @@ export class StockProductsService {
   }
 
   findAll() {
-    return this.stockProductsRepository.find({ relations: { product: true } });
+    return this.stockProductsRepository.find({
+      relations: {
+        product: {
+          categories: true,
+        },
+      },
+    });
   }
 
   async findOne(id: number) {
     const foundStockProduct = await this.stockProductsRepository.findOne({
       where: { id },
-      relations: { product: true },
+      relations: {
+        product: {
+          categories: true,
+        },
+      },
     });
 
     if (!foundStockProduct) {
