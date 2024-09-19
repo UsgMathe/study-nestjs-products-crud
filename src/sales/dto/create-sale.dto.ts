@@ -1,11 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  ArrayMinSize,
-  IsArray,
-  MinLength,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayMinSize, IsArray, ValidateNested } from 'class-validator';
 import { SaleItemDto } from './sale-item.dto';
 
 export class CreateSaleDto {
@@ -14,8 +9,8 @@ export class CreateSaleDto {
   @ApiProperty({
     type: [SaleItemDto],
     example: [
-      { stock_product_id: 1, quantity: 2, price: 10.99 },
-      { stock_product_id: 2, quantity: 1, price: 12.5 },
+      { stock_product_id: 1, quantity: 2 },
+      { stock_product_id: 2, quantity: 1 },
     ],
   })
   @ValidateNested({ each: true })

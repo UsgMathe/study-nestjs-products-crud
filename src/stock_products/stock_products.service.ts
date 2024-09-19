@@ -125,5 +125,7 @@ export class StockProductsService {
         `Stock product with ID ${notFountStockProductsIds[0]} not found`,
       );
     }
+
+    return foundStockProducts;
   }
 }

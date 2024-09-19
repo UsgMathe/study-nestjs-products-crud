@@ -1,18 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StockProductsService } from 'src/stock_products/stock_products.service';
 import { Repository } from 'typeorm';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Sale } from './entities/sale.entity';
-import { ProductsService } from 'src/products/products.service';
-import { StockProductsService } from 'src/stock_products/stock_products.service';
 
 @Injectable()
 export class SalesService {
   constructor(
     @InjectRepository(Sale)
     private readonly salesRepository: Repository<Sale>,
-    private readonly productsService: ProductsService,
     private readonly stockProductsService: StockProductsService,
   ) {}
 
@@ -20,7 +22,39 @@ export class SalesService {
     const { saleItems } = createSaleDto;
     const stockProductsIds = saleItems.map((item) => item.stock_product_id);
 
-    await this.stockProductsService.validateStockProductsIds(stockProductsIds);
+    const foundStockProducts =
+      await this.stockProductsService.validateStockProductsIds(
+        stockProductsIds,
+      );
+
+    const invalidSaleItemsQuantity = saleItems.filter((saleItem) => {
+      const foundStockProduct = foundStockProducts.find(
+        (stockProduct) => stockProduct.id == saleItem.stock_product_id,
+      );
+
+      return saleItem.quantity > foundStockProduct.quantity;
+    });
+
+    if (invalidSaleItemsQuantity.length) {
+      const invalidItemsIds = invalidSaleItemsQuantity.map(
+        (invalidSaleItem) => invalidSaleItem.stock_product_id,
+      );
+
+      if (invalidItemsIds.length > 1) {
+        throw new BadRequestException(
+          `Insufficient stock for products IDs: [${invalidItemsIds.join(', ')}].`,
+        );
+      }
+      const invalidSaleItem = invalidSaleItemsQuantity[0];
+
+      const foundStockProduct = foundStockProducts.find(
+        (stockProduct) => stockProduct.id == invalidSaleItem.stock_product_id,
+      );
+
+      throw new BadRequestException(
+        `Insufficient stock for product ID: ${invalidSaleItem.stock_product_id}. Available: ${foundStockProduct.quantity}, Requested: ${invalidSaleItem.quantity}.`,
+      );
+    }
 
     const sales = await Promise.all(
       saleItems.map(async (saleItem) => {
@@ -28,6 +62,9 @@ export class SalesService {
           saleItem.stock_product_id,
         );
 
+        await this.stockProductsService.update(stockProduct.id, {
+          quantity: stockProduct.quantity - saleItem.quantity,
+        });
         return this.salesRepository.create({
           product: stockProduct.product,
           amount: saleItem.quantity,
@@ -77,7 +114,10 @@ export class SalesService {
     return `This action updates a #${id} sale`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} sale`;
+  async remove(id: number) {
+    await this.findOne(id);
+
+    await this.salesRepository.delete({ id });
+    return;
   }
 }
