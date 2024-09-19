@@ -103,15 +103,66 @@ export class SalesService {
   }
 
   async update(id: number, updateSaleDto: UpdateSaleDto) {
-    await this.findOne(id);
+    const existingSale = await this.findOne(id);
 
     const { saleItems } = updateSaleDto;
-
     const stockProductsIds = saleItems.map((item) => item.stock_product_id);
 
-    await this.stockProductsService.validateStockProductsIds(stockProductsIds);
+    const foundStockProducts =
+      await this.stockProductsService.validateStockProductsIds(
+        stockProductsIds,
+      );
 
-    return `This action updates a #${id} sale`;
+    const invalidSaleItemsQuantity = saleItems.filter((saleItem) => {
+      const foundStockProduct = foundStockProducts.find(
+        (stockProduct) => stockProduct.id == saleItem.stock_product_id,
+      );
+
+      return saleItem.quantity > foundStockProduct.quantity;
+    });
+
+    if (invalidSaleItemsQuantity.length) {
+      const invalidItemsIds = invalidSaleItemsQuantity.map(
+        (invalidSaleItem) => invalidSaleItem.stock_product_id,
+      );
+
+      if (invalidItemsIds.length > 1) {
+        throw new BadRequestException(
+          `Insufficient stock for products IDs: [${invalidItemsIds.join(', ')}].`,
+        );
+      }
+      const invalidSaleItem = invalidSaleItemsQuantity[0];
+
+      const foundStockProduct = foundStockProducts.find(
+        (stockProduct) => stockProduct.id == invalidSaleItem.stock_product_id,
+      );
+
+      throw new BadRequestException(
+        `Insufficient stock for product ID: ${invalidSaleItem.stock_product_id}. Available: ${foundStockProduct.quantity}, Requested: ${invalidSaleItem.quantity}.`,
+      );
+    }
+
+    const updatedSales = await Promise.all(
+      saleItems.map(async (saleItem) => {
+        const stockProduct = await this.stockProductsService.findOne(
+          saleItem.stock_product_id,
+        );
+
+        const quantityDifference = saleItem.quantity - existingSale.amount;
+
+        await this.stockProductsService.update(stockProduct.id, {
+          quantity: stockProduct.quantity - quantityDifference,
+        });
+
+        return this.salesRepository.save({
+          ...existingSale,
+          amount: saleItem.quantity,
+          price: stockProduct.price,
+        });
+      }),
+    );
+
+    return updatedSales;
   }
 
   async remove(id: number) {
