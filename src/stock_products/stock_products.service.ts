@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductsService } from 'src/products/products.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateStockProductDto } from './dto/create-stock_product.dto';
 import { UpdateStockProductDto } from './dto/update-stock_product.dto';
 import { StockProduct } from './entities/stock_product.entity';
@@ -33,6 +33,19 @@ export class StockProductsService {
         product: {
           categories: true,
         },
+      },
+    });
+  }
+
+  findAllByIds(ids: number[]) {
+    return this.stockProductsRepository.find({
+      relations: {
+        product: {
+          categories: true,
+        },
+      },
+      where: {
+        id: In(ids),
       },
     });
   }
@@ -88,5 +101,29 @@ export class StockProductsService {
 
     await this.stockProductsRepository.delete({ id });
     return;
+  }
+
+  async validateStockProductsIds(ids: number[]) {
+    const foundStockProducts = await this.findAllByIds(ids);
+
+    const foundStockProductsIds = foundStockProducts.map(
+      (product) => product.id,
+    );
+
+    if (foundStockProducts.length < ids.length) {
+      const notFountStockProductsIds = ids.filter(
+        (stockProductId) => !foundStockProductsIds.includes(stockProductId),
+      );
+
+      if (notFountStockProductsIds.length > 1) {
+        throw new NotFoundException(
+          `Stock products with IDs ${notFountStockProductsIds.join(', ')} not found`,
+        );
+      }
+
+      throw new NotFoundException(
+        `Stock product with ID ${notFountStockProductsIds[0]} not found`,
+      );
+    }
   }
 }
