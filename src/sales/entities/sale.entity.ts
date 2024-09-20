@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Product } from 'src/products/entities/product.entity';
-import { StockProduct } from 'src/stock_products/entities/stock_product.entity';
 import {
   Column,
   CreateDateColumn,
@@ -16,7 +15,7 @@ export class Sale {
   id: number;
 
   @ManyToOne(() => Product, (product) => product.sales, { cascade: false })
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ type: () => Product })
   product: Product;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -28,5 +27,6 @@ export class Sale {
   amount: number;
 
   @CreateDateColumn()
+  @ApiProperty({ example: '2024-09-13T00:53:09.000Z' })
   sale_date: number;
 }
