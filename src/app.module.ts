@@ -10,6 +10,9 @@ import { Category } from './categories/entities/category.entity';
 import { StockProduct } from './stock_products/entities/stock_product.entity';
 import { SalesModule } from './sales/sales.module';
 import { Sale } from './sales/entities/sale.entity';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -17,12 +20,14 @@ import { Sale } from './sales/entities/sale.entity';
       type: 'sqlite',
       database: './database/db.sql',
       synchronize: true,
-      entities: [Product, Category, StockProduct, Sale],
+      entities: [Product, Category, StockProduct, Sale, User],
     }),
     ProductsModule,
     CategoriesModule,
     StockProductsModule,
     SalesModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
