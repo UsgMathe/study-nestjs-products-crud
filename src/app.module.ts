@@ -16,6 +16,10 @@ import { StockProduct } from './stock_products/entities/stock_product.entity';
 import { StockProductsModule } from './stock_products/stock_products.module';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
+import { SeedModule } from './seeders/seed.module';
+import { SeedService } from './seeders/seed.service';
+import { AuthService } from './auth/auth.service';
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -25,6 +29,7 @@ import { UsersModule } from './users/users.module';
       synchronize: true,
       entities: [Product, Category, StockProduct, Sale, User],
     }),
+    TypeOrmModule.forFeature([User]),
     ConfigModule.forRoot(),
     ProductsModule,
     CategoriesModule,
@@ -32,9 +37,13 @@ import { UsersModule } from './users/users.module';
     SalesModule,
     AuthModule,
     UsersModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [
+    SeedService,
+    UsersService,
+    AuthService,
     AppService,
     {
       provide: APP_GUARD,
@@ -42,4 +51,10 @@ import { UsersModule } from './users/users.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly seedService: SeedService) {}
+
+  async onModuleInit() {
+    await this.seedService.createAdminUser();
+  }
+}
