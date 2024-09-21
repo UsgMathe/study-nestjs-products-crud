@@ -20,9 +20,14 @@ import { SeedModule } from './seeders/seed.module';
 import { SeedService } from './seeders/seed.service';
 import { AuthService } from './auth/auth.service';
 import { UsersService } from './users/users.service';
+import { validateEnv } from './env.validation';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      validate: validateEnv,
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './database/db.sql',
