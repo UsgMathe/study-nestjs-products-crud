@@ -1,22 +1,21 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
-  NotFoundException,
-  Post,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { AuthLogInDto } from './dto/auth-logIn.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(User)
-    private usersService: UsersService,
-  ) {}
   private readonly saltRounds = 10;
+
+  constructor(
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
+  ) {}
 
   async hashPassword(password: string) {
     return await bcrypt.hash(password, this.saltRounds);
@@ -27,15 +26,18 @@ export class AuthService {
   }
 
   async logIn(user: AuthLogInDto) {
-    console.log('AAAAAAA', user);
     const { identifier, password } = user;
 
     const foundUser = await this.usersService.findOne({
-      where: { email: identifier },
+      where: [{ username: identifier }, { email: identifier }],
     });
+
+    if (!foundUser) throw new UnauthorizedException();
 
     if (!this.comparePasswords(password, foundUser.password)) {
       throw new UnauthorizedException();
     }
+
+    return foundUser;
   }
 }
