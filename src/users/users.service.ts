@@ -66,7 +66,17 @@ export class UsersService {
     return this.usersRepository.find(options);
   }
 
-  async findOne(id: number, options?: FindOneOptions<User>) {
+  async findOne(options?: FindOneOptions<User>) {
+    const foundUser = await this.usersRepository.findOne(options);
+
+    if (!foundUser) {
+      throw new NotFoundException(`User not found`);
+    }
+
+    return foundUser;
+  }
+
+  async findOneById(id: number, options?: FindOneOptions<User>) {
     const foundUser = await this.usersRepository.findOne({
       where: { id, ...options?.where },
       ...options,
@@ -79,7 +89,7 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const foundUser = await this.findOne(id);
+    const foundUser = await this.findOneById(id);
     if (updateUserDto.oldPassword) {
       const isValidPassword = await this.authService.comparePasswords(
         updateUserDto.oldPassword,
@@ -101,17 +111,17 @@ export class UsersService {
 
       await this.usersRepository.update(id, user);
 
-      return this.findOne(id, { select: ['id', 'username', 'email'] });
+      return this.findOneById(id, { select: ['id', 'username', 'email'] });
     }
 
     const user = this.usersRepository.create(updateUserDto);
     await this.usersRepository.update(id, user);
 
-    return this.findOne(id, { select: ['id', 'username', 'email'] });
+    return this.findOneById(id, { select: ['id', 'username', 'email'] });
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    await this.findOneById(id);
 
     await this.usersRepository.delete({ id });
     return;
