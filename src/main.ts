@@ -22,6 +22,12 @@ async function bootstrap() {
       },
       'AUTH_KEY',
     )
+    .addTag('Auth')
+    .addTag('Users')
+    .addTag('Categories')
+    .addTag('Products')
+    .addTag('Stock Products')
+    .addTag('Sales')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
