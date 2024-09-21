@@ -49,7 +49,7 @@ export class SalesController {
 
   @Get(':id')
   @ApiParam({ name: 'id', description: 'ID of product sale', example: 1 })
-  @ApiOperation({ summary: 'Find product by ID' })
+  @ApiOperation({ summary: 'Find product sale by ID' })
   @ApiOkResponse({ description: 'Found product sale', type: Sale })
   @ApiNotFoundResponse({
     description: 'Sale not found',
@@ -91,11 +91,7 @@ export class SalesController {
   @Delete(':id')
   @HttpCode(204)
   @ApiOperation({ summary: 'Deletes a existing sale' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID of an existing sale',
-    example: 1,
-  })
+  @ApiParam({ name: 'id', description: 'ID of an existing sale', example: 1 })
   @ApiNoContentResponse({ description: 'Sale successfully deleted' })
   @ApiNotFoundResponse({
     description: 'Sale not found',
