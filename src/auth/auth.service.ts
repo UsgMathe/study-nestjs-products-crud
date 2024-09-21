@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { AuthLogInDto } from './dto/auth-logIn.dto';
@@ -15,6 +16,7 @@ export class AuthService {
   constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    private jwtService: JwtService,
   ) {}
 
   async hashPassword(password: string) {
@@ -28,9 +30,15 @@ export class AuthService {
   async logIn(user: AuthLogInDto) {
     const { identifier, password } = user;
 
-    const foundUser = await this.usersService.findOne({
-      where: [{ username: identifier }, { email: identifier }],
-    });
+    try {
+    } catch {}
+    const foundUser = await this.usersService
+      .findOne({
+        where: [{ username: identifier }, { email: identifier }],
+      })
+      .catch(() => {
+        throw new UnauthorizedException();
+      });
 
     if (!foundUser) throw new UnauthorizedException();
 
@@ -38,6 +46,16 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return foundUser;
+    const payload = {
+      id: foundUser.id,
+      username: foundUser.username,
+      email: foundUser.email,
+    };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_SECRET,
+      }),
+    };
   }
 }

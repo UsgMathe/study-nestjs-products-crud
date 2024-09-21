@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProductsModule } from './products/products.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CategoriesModule } from './categories/categories.module';
-import { StockProductsModule } from './stock_products/stock_products.module';
-import { Product } from './products/entities/product.entity';
-import { Category } from './categories/entities/category.entity';
-import { StockProduct } from './stock_products/entities/stock_product.entity';
-import { SalesModule } from './sales/sales.module';
-import { Sale } from './sales/entities/sale.entity';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { CategoriesModule } from './categories/categories.module';
+import { Category } from './categories/entities/category.entity';
+import { Product } from './products/entities/product.entity';
+import { ProductsModule } from './products/products.module';
+import { Sale } from './sales/entities/sale.entity';
+import { SalesModule } from './sales/sales.module';
+import { StockProduct } from './stock_products/entities/stock_product.entity';
+import { StockProductsModule } from './stock_products/stock_products.module';
 import { User } from './users/entities/user.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { User } from './users/entities/user.entity';
       synchronize: true,
       entities: [Product, Category, StockProduct, Sale, User],
     }),
+    ConfigModule.forRoot(),
     ProductsModule,
     CategoriesModule,
     StockProductsModule,
