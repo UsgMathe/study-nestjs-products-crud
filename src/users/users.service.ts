@@ -4,12 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -29,8 +29,6 @@ export class UsersService {
     const foundUserByEmail = await this.usersRepository.findOne({
       where: { email: email },
     });
-
-    console.log({ foundUserByUsername, foundUserByEmail });
 
     if (foundUserByUsername && foundUserByEmail) {
       throw new ConflictException(
@@ -55,12 +53,6 @@ export class UsersService {
       password: hashedPassword,
     });
 
-    console.log(user);
-
-    console.log(
-      await this.authService.comparePasswords(password, hashedPassword),
-    );
-
     await this.usersRepository.save(user);
 
     return {
@@ -70,14 +62,14 @@ export class UsersService {
     };
   }
 
-  findAll() {
-    return this.usersRepository.find({ select: ['id', 'username', 'email'] });
+  findAll(options?: FindManyOptions<User>) {
+    return this.usersRepository.find(options);
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, options?: FindOneOptions<User>) {
     const foundUser = await this.usersRepository.findOne({
-      select: ['id', 'username', 'email'],
-      where: { id },
+      where: { id, ...options?.where },
+      ...options,
     });
 
     if (!foundUser)
@@ -86,11 +78,42 @@ export class UsersService {
     return foundUser;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const foundUser = await this.findOne(id);
+    if (updateUserDto.oldPassword) {
+      const isValidPassword = await this.authService.comparePasswords(
+        updateUserDto.oldPassword,
+        foundUser.password,
+      );
+
+      if (!isValidPassword) {
+        return new BadRequestException('Old password is incorrect.');
+      }
+
+      const password = await this.authService.hashPassword(
+        updateUserDto.newPassword,
+      );
+
+      const user = this.usersRepository.create({
+        ...updateUserDto,
+        password: password,
+      });
+
+      await this.usersRepository.update(id, user);
+
+      return this.findOne(id, { select: ['id', 'username', 'email'] });
+    }
+
+    const user = this.usersRepository.create(updateUserDto);
+    await this.usersRepository.update(id, user);
+
+    return this.findOne(id, { select: ['id', 'username', 'email'] });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    await this.findOne(id);
+
+    await this.usersRepository.delete({ id });
+    return;
   }
 }
